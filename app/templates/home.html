@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>People!</h2>
+    <p>Add Someone...</p>
+
+    <form action="/new" method="post">
+      <input type="text" name="name"></input>
+      <input type="submit"></input>
+    </form>
+    <hr>
+    {% for item in items %}
+      <p> Name: {{ item.name }} </p>
+      <p>Added: {{ item.birthday }} </p>
+      <hr>
+    {% endfor %}
+
+  </body>
+</html>
