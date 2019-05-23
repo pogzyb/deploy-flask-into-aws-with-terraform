@@ -28,7 +28,7 @@ print(r.json())
 // copy the uid!
 
 </code></pre>
-3. GET (Retrieve data about a person)
+3. GET (retrieve data about a person)
 <pre><code>import requests
 
 uid = "<_paste_uid_here_>"
