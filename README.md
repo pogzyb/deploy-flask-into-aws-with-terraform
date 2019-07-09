@@ -1,10 +1,15 @@
 # flask-postgres
-Simple Flask application/api with a Postgres database
+Simple Flask API with a Postgres Database
 
-#### Setup:
+#### Setup (Flask-app/Docker only):
 1. Install Docker Desktop: https://docs.docker.com/docker-for-mac/install/
 2. Clone this Repo: <code>$ git clone https://github.com/pogzyb/flask-postgres.git</code>
 3. Run: <code>$ docker-compose up --build</code>
+
+#### Setup (Using Terraform in AWS)
+1. Make an AWS account
+2. Install Terraform
+3. 
 
 #### Usage:<br>
 
