@@ -8,13 +8,6 @@ Simple Flask application/api with a Postgres database
 
 #### Usage:<br>
 
-<b>-- UI</b>
-1. Navigate to localhost:5000
-2. Submit a name in the form
-3. Return to localhost:5000
-4. List of People will be updated
-
-<b>-- API</b>
 1. Open a new python shell: <code>$ python </code>
 2. POST (add a new person)
 <pre><code>import requests
