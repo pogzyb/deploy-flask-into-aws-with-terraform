@@ -24,8 +24,8 @@ r = requests.post(
 
 print(r.json())
 // copy the uid!
-
 </code></pre>
+
 3. GET (retrieve data about a person)
 <pre><code>import requests
 
