@@ -1,6 +1,9 @@
 # mac
 .DS_Store
 
+# pycharm
+.idea/
+
 # Compiled files
 *.tfstate
 *.tfstate.backup
