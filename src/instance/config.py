@@ -3,7 +3,7 @@ import os
 import logging
 
 # SECRET KEY
-SECRET_KEY = '12345678900987654321'
+SECRET_KEY = os.getenv('APP_SECRET_KEY')
 
 # Base Directory
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
