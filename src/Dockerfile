@@ -7,11 +7,17 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-COPY . /code
-WORKDIR /code
+COPY ./src/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --upgrade pip
 
-RUN pip install -r requirements.txt
+COPY ./src/entrypoint.sh /usr/local/bin/
+RUN chmod u+x /usr/local/bin/entrypoint.sh
 
-EXPOSE 5000
+COPY ./src/app/ /${APP_HOME}/app
+COPY ./src/instance /${APP_HOME}/instance
+COPY ./src/run.py /${APP_HOME}
 
-CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "60s", "python", "-u", "run.py"]
+WORKDIR /${APP_HOME}
+EXPOSE ${APP_PORT}
+
+CMD ["./entrypoint.sh"]

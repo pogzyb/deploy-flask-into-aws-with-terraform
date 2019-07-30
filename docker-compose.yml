@@ -4,28 +4,26 @@ version: '3.5'
 services:
 
   flask:
-    build: .
+    build:
+      context: .
+      dockerfile: ./src/Dockerfile
     container_name: flask-app
-    networks:
-      - flaskapi
     env_file:
       - evars.env
     ports:
-      - "5000:5000"
+      - "8080:8080"
     volumes:
       - .:/code
+    entrypoint: "dockerize -wait tcp://flask-app-db:5432 -timeout 60s"
+    command: ["/bin/bash", "-c", "entrypoint.sh"]
 
   postgres:
     image: postgres:11
-    container_name: postgres-db
-    networks:
-      - flaskapi
+    container_name: flask-app-db
+    hostname: flask-app-db
     env_file:
       - evars.env
     ports:
       - "5432:5432"
-    volumes:
-      - ./data:/var/lib/postgres
-
-networks:
-  flaskapi:
+#    volumes:
+#      - ./data:/var/lib/postgres

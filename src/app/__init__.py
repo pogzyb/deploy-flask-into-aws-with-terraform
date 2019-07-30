@@ -2,18 +2,24 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-# factory
-def create_app(Flask):
+
+# database object
+db = None
+
+
+# factory function
+def create_app():
+    global db
     app = Flask(__name__)
     # configs from configs.py
     app.config.from_object('config')
+    # initialize database
+    db = SQLAlchemy(app)
     return app
 
-# create app
-app = create_app(Flask)
 
-# create db
-db = SQLAlchemy(app)
+# actually create app
+app = create_app()
 
-# import views (do this last)
+# import views
 from . import views
