@@ -1,6 +1,9 @@
 # src/app/models.py
-from . import db
+from flask_sqlalchemy import SQLAlchemy
+import datetime
 
+
+db = SQLAlchemy()
 
 """
 Models: the database objects
@@ -18,6 +21,8 @@ class Person(db.Model):
         nullable=False
     )
 
-    def __init__(self, uid, name):
+    def __init__(self, uid, name, birthday=None):
         self.uid = uid
         self.name = name
+        if isinstance(birthday, datetime.datetime):
+            self.birthday = birthday

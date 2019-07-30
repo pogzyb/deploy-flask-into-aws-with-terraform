@@ -6,14 +6,15 @@
 
     <form action="/new" method="post">
       <input type="text" name="name"></input>
-      <button type="submit"></button>
+      <button type="submit">Submit!</button>
     </form>
 
     <hr>
 
     {% for item in items %}
       <p> Name: {{ item.name }} </p>
-      <p>Added: {{ item.birthday }} </p>
+      <p> UID: {{ item.uid }}</p>
+      <p> Added: {{ item.birthday }} </p>
       <hr>
     {% endfor %}
 

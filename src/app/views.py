@@ -1,37 +1,56 @@
 # src/app/views.py
-from . import app, db
-from .models import Person
-from flask import jsonify, request, render_template
+from .models import db, Person
+from flask import Blueprint, jsonify, request, render_template
 from uuid import uuid1
-import threading
-import time
+import logging
 
 
 """
-Define Routes and Populate Views
+Blueprint Views
 """
-@app.route('/', methods=['GET'])
+
+# simple homepage
+homepage = Blueprint('home', __name__, template_folder='templates')
+
+
+@homepage.route('/', methods=['GET', 'POST'])
 def home():
     """
     This is the homepage of the app, and displays every Person in the database
 
-    :return: renders the home.html template with database data
+    :return: renders the index.html template with database data
     """
     people = Person.query.all()
-    return render_template('home.html', items=people)
+    if request.method == 'GET':
+        return render_template('home.html', items={'people': people, 'alert': None})
+    elif request.form:
+        data = request.form
+        exists = Person.query.filter_by(name=data['name']).first()
+        if exists:
+            payload = {'people': people, 'alert': ('danger', f'{data["name"]} already exists!')}
+            return render_template('home.html', items=payload)
+        # doesn't exist; generate new Person
+        uid = str(uuid1())
+        p = Person(uid=uid, name=data['name'])
+        db.session.add(p)
+        db.session.commit()
+        people = Person.query.all()
+        payload = {'people': people, 'alert': ('success', f'{data["name"]} was added!')}
+        return render_template('home.html', items=payload)
 
 
-@app.route('/new', methods=['POST'])
+# api routes
+api = Blueprint('api', __name__)
+
+
+@api.route('/new', methods=['POST'])
 def new():
     """
-    This is a both a Form and API method to add something new to the database
+    This is an API method to add something new to the database
 
     :return: json payload w/ uid of new Person if successful
     """
-    if request.form:
-        data = request.form
-    else:
-        data = request.get_json()
+    data = request.get_json()
     exists = Person.query.filter_by(name=data['name']).first()
     if exists:
         return jsonify({'status': 'This already exists!'}), 409
@@ -43,7 +62,7 @@ def new():
     return jsonify({'status': 'success', 'uid': uid}), 201
 
 
-@app.route('/one/<uid>', methods=['GET'])
+@api.route('/one/<uid>', methods=['GET'])
 def one(uid):
     """
     This is an API method to retrieve one record from the database
@@ -62,7 +81,7 @@ def one(uid):
     return jsonify({'status': 'success', 'data': payload}), 200
 
 
-@app.route('/all', methods=['GET'])
+@api.route('/all', methods=['GET'])
 def everything():
     """
 
@@ -73,14 +92,14 @@ def everything():
 
 
 """
-Threading example: Long-running background task
+Threading: Long-running background task
 """
-@app.route('/long-task', methods=['POST'])
+@api.route('/long-task', methods=['POST'])
 def background():
+    try:
+        pass
+    except Exception as e:
+        logging.debug(f'{e}')
+        return
     return
 
-
-"""
-Create Models after they're imported
-"""
-db.create_all()
