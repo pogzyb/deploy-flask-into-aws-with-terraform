@@ -1,5 +1,6 @@
-# app/models.py
+# src/app/models.py
 from . import db
+
 
 """
 Models: the database objects
@@ -20,6 +21,3 @@ class Person(db.Model):
     def __init__(self, uid, name):
         self.uid = uid
         self.name = name
-
-
-db.create_all()
