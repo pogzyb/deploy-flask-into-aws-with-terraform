@@ -6,14 +6,21 @@
 
     <form action="/new" method="post">
       <input type="text" name="name"></input>
-      <input type="submit"></input>
+      <button type="submit"></button>
     </form>
+
     <hr>
+
     {% for item in items %}
       <p> Name: {{ item.name }} </p>
       <p>Added: {{ item.birthday }} </p>
       <hr>
     {% endfor %}
+
+    <h2>Threading Example!</h2>
+    <form action="/background" method="post">
+      <button type="submit">Submit Long Running Task!</button>
+    </form>
 
   </body>
 </html>
