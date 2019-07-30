@@ -1,5 +1,5 @@
-# flask-postgres
-Simple Flask API with a Postgres Database
+# flask-postgres (+ Docker and Terraform!)
+Simple Flask Application with a Postgres Database (Containerized with Docker and deployable with Terraform)!
 
 #### Setup (Flask-app/Docker only):
 1. Install Docker Desktop: https://docs.docker.com/docker-for-mac/install/
