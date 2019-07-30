@@ -1,4 +1,5 @@
-# app.py
+# src/run.py
+# application entrypoint used by gunicorn
 from app import create_app
 import os
 
