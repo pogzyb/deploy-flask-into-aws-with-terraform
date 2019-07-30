@@ -7,19 +7,20 @@ from flask_sqlalchemy import SQLAlchemy
 db = None
 
 
-# factory function
+# app factory function
 def create_app():
     global db
-    app = Flask(__name__)
-    # configs from configs.py
-    app.config.from_object('config')
-    # initialize database
-    db = SQLAlchemy(app)
+    app = Flask(__name__, instance_relative_config=True)
+    with app.app_context():
+        # configs from configs.py
+        app.config.from_pyfile('config.py')
+        # initialize database
+        db = SQLAlchemy(app)
+
     return app
 
 
-# actually create app
 app = create_app()
 
-# import views
+
 from . import views

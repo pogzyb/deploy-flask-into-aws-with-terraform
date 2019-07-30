@@ -1,9 +1,10 @@
-# app/views.py
+# src/app/views.py
 from . import app, db
 from .models import Person
 from flask import jsonify, request, render_template
 from uuid import uuid1
 import threading
+import time
 
 
 """
@@ -77,3 +78,9 @@ Threading example: Long-running background task
 @app.route('/long-task', methods=['POST'])
 def background():
     return
+
+
+"""
+Create Models after they're imported
+"""
+db.create_all()
