@@ -2,6 +2,8 @@
 import os
 import logging
 
+# SECRET KEY
+SECRET_KEY = '12345678900987654321'
 
 # Base Directory
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
