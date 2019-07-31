@@ -1,6 +1,7 @@
 # src/app/views.py
-from .models import db, Person
-from flask import Blueprint, jsonify, request, render_template
+from . import db, tm
+from .models import Person
+from flask import Blueprint, jsonify, request, render_template, url_for, redirect
 from uuid import uuid1
 import logging
 
@@ -10,10 +11,10 @@ Blueprint Views
 """
 
 # simple homepage
-homepage = Blueprint('home', __name__, template_folder='templates')
+webpage = Blueprint('webpage', __name__, template_folder='templates')
 
 
-@homepage.route('/', methods=['GET', 'POST'])
+@webpage.route('/', methods=['GET', 'POST'])
 def home():
     """
     This is the homepage of the app, and displays every Person in the database
@@ -37,6 +38,30 @@ def home():
         people = Person.query.all()
         payload = {'people': people, 'alert': ('success', f'{data["name"]} was added!')}
         return render_template('home.html', items=payload)
+
+
+"""
+Long-running Background Task as a Threading Example!
+"""
+@webpage.route('/background', methods=['POST'])
+def background():
+    try:
+        data = request.form
+        tm.create_task(data['name'])
+        return redirect(url_for('webpage.status', name=data['name']))
+    except Exception as e:
+        people = Person.query.all()
+        return render_template('home.html', items={'people': people, 'alert': ('danger', f'{e}')})
+
+
+@webpage.route('/background/<name>', methods=['GET'])
+def status(name):
+    current_status = tm.get_status(name)
+    if not current_status:
+        people = Person.query.all()
+        return render_template('home.html', items={'people': people, 'alert': ('warning', f'No tasks created for {name}.')})
+    items = {'status': current_status}
+    return render_template('status.html', items=items)
 
 
 # api routes
@@ -91,15 +116,4 @@ def everything():
     return jsonify({'status': 'success', 'data': peeps}), 200
 
 
-"""
-Threading: Long-running background task
-"""
-@api.route('/long-task', methods=['POST'])
-def background():
-    try:
-        pass
-    except Exception as e:
-        logging.debug(f'{e}')
-        return
-    return
 
