@@ -48,9 +48,11 @@
     <main role="main" class="flex-shrink-0">
       <div class="container">
         <h1 class="mt-5">Status Page</h1>
-        <p class="lead">Some Status Updates on that Long Running Task...</p>
+        <p class="lead">View the Status of that Long Running Task...(Refresh the page!)</p>
+        <p>Log messages will appear below:</p>
+        <hr>
         {% for msg in items['status'].messages %}
-          <p>{{ msg }}</p>
+          <pre><code>{{ msg }}</code></pre>
         {% endfor %}
       </div>
     </main>
