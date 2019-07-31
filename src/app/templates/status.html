@@ -54,6 +54,10 @@
         {% for msg in items['status'].messages %}
           <pre><code>{{ msg }}</code></pre>
         {% endfor %}
+        <hr>
+        {% if items['status'].status.split(' -- ')[-1] == 'I\'m Done!' %}
+        <a class="btn btn-md btn-primary" type="button" href="/">Finished!</a>
+        {% endif %}
       </div>
     </main>
 

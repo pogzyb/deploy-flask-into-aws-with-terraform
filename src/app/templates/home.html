@@ -49,11 +49,11 @@
       <div class="container">
         <h1 class="mt-5">People Database</h1>
         <p class="lead">Just a simple Flask Web Application using a Postgres Database.<br> Go ahead and play with it...</p>
-        <p>Source code can be found on <a href="https://github.com/pogzyb/flask-postgres">github.com</a></p>
-        <form class="form-inline" action="/background" method="post">
+        <p>Source code can be found on <a href="https://github.com/pogzyb/flask-postgres" target="_blank">github.com</a></p>
+        <form class="form-inline" action="/" method="post">
             <input type="text" name="name" class="form-control" id="exampleInputPerson1" placeholder="Enter a name!" required>
             <button class="btn btn-md btn-primary" type="submit" style="margin-left: 15px;">Submit!</button>
-            <button class="btn btn-md btn-warning" type="submit" style="margin-left: 15px;">Do Long Running Submit!</button>
+            <button class="btn btn-md btn-warning" type="submit" onclick="javascript: form.action='/background';" style="margin-left: 15px;">Do Long Running Submit!</button>
         </form>
         <br>
         {% if items['alert'] %}
