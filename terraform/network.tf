@@ -1,6 +1,6 @@
 /********
 
-terraform/prereqs/network.tf contains all the necessary resources to
+terraform/network.tf contains all the necessary resources to
 setup the basis for our ECS application and AWS environment
 
 Resources:
@@ -77,7 +77,7 @@ resource "aws_subnet" "fp-public-subnets" {
 resource "aws_subnet" "fp-private-subnets" {
   count             = 2
   cidr_block        = var.private_cidrs[count.index]
-  #cidr_block        = cidrsubnet(aws_vpc.fp-vpc.cidr_block, 8, count.index)
+  # cidr_block        = cidrsubnet(aws_vpc.fp-vpc.cidr_block, 8, count.index)
   availability_zone = data.aws_availability_zones.azs.names[count.index]
   vpc_id            = aws_vpc.fp-vpc.id
 
@@ -89,7 +89,7 @@ resource "aws_subnet" "fp-private-subnets" {
 # create db subnet group
 resource "aws_db_subnet_group" "fp-db-subnet" {
   name = "postgres-db-subnet-group"
-  subnet_ids = [aws_subnet.fp-private-subnets.*.id]
+  subnet_ids = aws_subnet.fp-private-subnets.*.id
 
   tags = {
     Name = "flask-postgres-db-subnet"
@@ -98,14 +98,14 @@ resource "aws_db_subnet_group" "fp-db-subnet" {
 
 # associate the public subnets with the public route table
 resource "aws_route_table_association" "fp-public-rt-assc" {
-  count = aws_subnet.fp-public-subnets.count
+  count = 2
   route_table_id = aws_route_table.fp-rt-public.id
   subnet_id = aws_subnet.fp-public-subnets.*.id[count.index]
 }
 
 # associate the private subnets with the public route table
-resource "aws_route_table_association" "fp-public-rt-assc" {
-  count = aws_subnet.fp-private-subnets.count
+resource "aws_route_table_association" "fp-private-rt-assc" {
+  count = 2
   route_table_id = aws_route_table.fp-rt-public.id
   subnet_id = aws_subnet.fp-private-subnets.*.id[count.index]
 }
