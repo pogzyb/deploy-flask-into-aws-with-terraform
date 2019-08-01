@@ -48,20 +48,19 @@ def background():
     try:
         data = request.form
         tm.create_task(data['name'])
-        return redirect(url_for('webpage.status', name=data['name']))
+        return redirect(url_for('.status', name=data['name']))
     except Exception as e:
         people = Person.query.all()
         return render_template('home.html', items={'people': people, 'alert': ('danger', f'{e}')})
 
 
-@webpage.route('/background/<name>', methods=['GET'])
+@webpage.route('/status/<name>', methods=['GET'])
 def status(name):
     current_status = tm.get_status(name)
     if not current_status:
         people = Person.query.all()
         return render_template('home.html', items={'people': people, 'alert': ('warning', f'No tasks created for {name}.')})
-    items = {'status': current_status}
-    return render_template('status.html', items=items)
+    return render_template('status.html', items={'status': current_status})
 
 
 # api routes

@@ -16,8 +16,8 @@ def create_app():
     # configs from configs.py
     app.config.from_pyfile('config.py')
     with app.app_context():
-        # proxyfix for X-Forwarded- headers
-        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1)
+        # proxy-fix for aws application load-balancer headers
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1, x_host=1)
         # initialize database
         from .models import db
         db.init_app(app)
