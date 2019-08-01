@@ -1,5 +1,6 @@
 # app/__init__.py
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 db = None
@@ -15,6 +16,8 @@ def create_app():
     # configs from configs.py
     app.config.from_pyfile('config.py')
     with app.app_context():
+        # proxyfix for X-Forwarded- headers
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1)
         # initialize database
         from .models import db
         db.init_app(app)
