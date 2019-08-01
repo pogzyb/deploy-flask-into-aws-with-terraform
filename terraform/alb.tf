@@ -1,6 +1,6 @@
 /********
 
-terraform/prereqs/alb.tf contains all the necessary resources to
+terraform/alb.tf contains all the necessary resources to
 setup the Application Load Balancer for the ECS application
 
 Resources:
