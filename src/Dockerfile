@@ -20,4 +20,4 @@ COPY ./src/run.py /${APP_HOME}
 WORKDIR /${APP_HOME}
 EXPOSE ${APP_PORT}
 
-CMD ["./entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "entrypoint.sh"]
