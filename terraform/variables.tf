@@ -28,14 +28,34 @@ variable "private_cidrs" {
   ]
 }
 
+variable "flask_app_image" {
+  description = "Dockerhub image for flask-app"
+  default = "docker.io/doodmanbro/flask-app:0.1.0"
+}
+
 variable "flask_app_port" {
   description = "Port exposed by the flask application"
-  default = "8080"
+  default = 8080
+}
+
+variable "flask_env" {
+  description = "FLASK ENV variable"
+  default = "production"
+}
+
+variable "flask_app" {
+  description = "FLASK APP variable"
+  default = "app"
+}
+
+variable "app_home" {
+  description = "APP HOME variable"
+  default = "flask-postgres/src/"
 }
 
 variable "postgres_db_port" {
   description = "Port exposed by the RDS instance"
-  default = "5432"
+  default = 5432
 }
 
 variable "rds_instance_type" {
