@@ -8,6 +8,7 @@
 *.tfstate
 *.tfstate.backup
 .terraform.tfstate.lock.info
+*.tfvars
 
 # Module directory
 .terraform/
