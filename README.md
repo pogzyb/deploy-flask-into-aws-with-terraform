@@ -31,7 +31,7 @@ Here is a simple Flask Application connected to a Postgres Database...
 <pre><code>import requests
 
 r = requests.post(
-  url="http://localhost:5000/new",
+  url="http://localhost:8080/new",
   json={"name": "joe"}
 )
 
