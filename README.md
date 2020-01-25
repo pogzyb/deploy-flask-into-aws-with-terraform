@@ -1,11 +1,11 @@
-# Flask and Postgres (with Docker and Terraform!)
-Here is a simple Flask Application connected to a Postgres Database...
+# Flask and Postgres with Docker and Terraform
+Example Flask Application connected to a Postgres Database...
 (and it's Containerized with Docker and deployable with Terraform in AWS!)
 
 ### Local Setup (Flask-app/Docker only):
 1. Install Docker Desktop: https://docs.docker.com/docker-for-mac/install/
-2. Clone this Repo: <code>$ git clone https://github.com/pogzyb/flask-postgres.git</code>
-3. Run: <code>$ docker-compose up --build</code>
+2. <code>git clone https://github.com/pogzyb/flask-postgres.git</code>
+3. <code>docker-compose up --build</code>
 
 ### AWS Setup (Using Terraform in AWS)
 1. Make an AWS account
