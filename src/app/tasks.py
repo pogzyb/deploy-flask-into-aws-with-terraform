@@ -1,129 +1,117 @@
-# src/app/tasks.py
-from .models import Person
+# app/tasks.py
+from concurrent.futures import ThreadPoolExecutor, Future
+from threading import RLock
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from time import sleep
-from uuid import uuid1
-import threading
+from typing import Dict, Any
+import random
 import logging
-import copy
+import datetime
+import time
+
+from app.models import Wiki, Status
 
 
 logger = logging.getLogger(__name__)
 
-"""
-TaskManager handles spawning long-running
-background tasks in separate threads.
-"""
-
-
-class TaskStatus(object):
-    """
-    Status updates displayed to the user.
-    """
-
-    def __init__(self):
-        self.status = f'{str(datetime.now())} -- Starting!'
-        self.messages = [self.status]
-
-    def update_status(self, new_status: str) -> None:
-        self.status = new_status
-        self.messages.append(new_status)
-
 
 class TaskManager(object):
     """
-    Handles spawning new threads
+    Manages kicking off "Tasks" and returning tracking their results
     """
+    def __init__(self, max_workers: int = 2):
+        self.task_status_map = {}
+        self._pool = ThreadPoolExecutor(max_workers=max_workers)
+        self._lock = RLock()
+        self._app = None
+        self._db = None
 
-    def __init__(self):
-        self.task_map = dict()
-        self.task_status_map = dict()
-        self._lock = threading.RLock()
+    def init_app(self, app: Flask, db: SQLAlchemy) -> None:
+        self._app = app
+        self._db = db
 
-    def init_app(self, app: Flask, db: SQLAlchemy):
-        self.app = app
-        self.db = db
+    def create_task(self, data) -> None:
+        term = data.get('term')
+        task = Task(
+            uid=data.get('uid'),
+            app_ref=self._app,
+            db_ref=self._db,
+            tm_ref=self
+        )
+        submitted_task = self._pool.submit(task.do_search, data, self._lock)
+        logger.info(f'Submitted task for {term}')
+        submitted_task.add_done_callback(task.done_callback)
 
-    def create_task(self, item: str):
-        with self._lock:
-            if self.get_status(item):
-                return  # already doing it
-            task = Task(self, self.app, self.db)
-            self.task_map[item] = task
-            # task manager gets its own task status object to work with
-            self.task_status_map[item] = TaskStatus()
-            task.entrypoint(item)
-            return
+    def get_record(self, term: str) -> Wiki:
+        with self._app.app_context():
+            record = self._db.session.query(Wiki).filter_by(term=term).first()
+            if not record:
+                return None
+            else:
+                return record
 
-    def get_status(self, item: str) -> TaskStatus:
-        with self._lock:
-            return self.task_status_map.get(item)
+    def check_done(self, term: str) -> bool:
+        with self._app.app_context():
+            record = self._db.session.query(Wiki).filter_by(term=term).first()
+            if not record:
+                return False
+            return record.status == Status.complete
 
-    def update_task_status_object(self, task_status_obj: TaskStatus, item: str):
-        with self._lock:
-            self.task_status_map[item] = task_status_obj
+    def update_status(self, uid: str, status: Status) -> None:
+        with self._app.app_context():
+            record = self._db.session.query(Wiki).filter_by(uid=uid).first()
+            record.status = status
+            self._db.session.commit()
+            logger.info(f'Updated status for {record.term}')
 
-    def destroy_task(self):
-        """
-        Remove tasks that are done. WIP
-
-        :return:
-        """
-        pass
+    def update_messages(self, term: str, message: str) -> None:
+        with self._app.app_context():
+            record = self._db.session.query(Wiki).filter_by(term=term).first()
+            modified = list(record.messages)
+            modified.append(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - {message}')
+            record.messages = modified
+            self._db.session.commit()
+        logger.info(f'Updated messages for {term}')
 
 
 class Task(object):
     """
-    Does the background task in its own thread
+    Performs the actual Task and saves results to the database
     """
+    def __init__(self, uid: str, app_ref: Flask, db_ref: SQLAlchemy, tm_ref: TaskManager):
+        self._app = app_ref
+        self._db = db_ref
+        self._tm = tm_ref
+        self._uid = uid
+        self._status = Status.pending
 
-    def __init__(self, tm_reference: TaskManager, app_reference: Flask, db_reference: SQLAlchemy):
-        self.tm = tm_reference
-        self.app = app_reference
-        self.db = db_reference
-        self.ts = TaskStatus()
+    def do_search(self, data: Dict[str, Any], lock: RLock) -> None:
+        with lock:
+            term = data.get('term')
+            logger.info(f'Acquired Locked! Saving initial data for {term}')
+            search = Wiki(
+                term=term,
+                uid=self._uid,
+                status=self._status,
+                messages=[
+                    f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - Starting Wikipedia scrape for {term}!'
+                ]
+            )
+            with self._app.app_context():
+                self._db.session.add(search)
+                self._db.session.commit()
+            logger.info(f'Releasing Lock! Saved {term}')
 
-    def update_task_status(self, new_status, item: str):
-        status_string = f'{str(datetime.now())} -- {new_status}'
-        self.ts.update_status(status_string)
-        self.push_new_status_to_manager(item)
+        # search and parse Wikipedia
+        time.sleep(random.randint(0, 10))
+        self._tm.update_messages(term, 'Almost done!')
+        time.sleep(random.randint(0, 10))
+        self._status = Status.complete
 
-    def push_new_status_to_manager(self, item: str):
-        self.tm.update_task_status_object(copy.deepcopy(self.ts), item)
-
-    def entrypoint(self, item: str):
-        """
-        Mimics long task by taking 15 seconds to insert a record
-
-        :param item:
-        :return:
-        """
-        thread = threading.Thread(target=self.run_task, args=(item,), daemon=True)
-        thread.start()
-
-    def run_task(self, item: str):
-        with self.app.app_context():
-            logger.info(f'Working on {item}!')
-            self.update_task_status('Running fast!', item)
-            sleep(5)
-            self.update_task_status('Still running!', item)
-            person = Person(name=item, uid=str(uuid1()))
-            exists = self.db.session.query(Person).filter_by(name=item).first()
-            if exists:
-                self.update_task_status(f'{item} already exists!', item)
-                self.update_task_status(f'...so I\'m Done!', item)
-                return
-            sleep(5)
-            self.update_task_status('Stopping!', item)
-            self.db.session.add(person)
-            self.db.session.commit()
-            sleep(5)
-            self.update_task_status(f'{item} was added to the Database!', item)
-            self.update_task_status('I\'m Done!', item)
-            self.tm.destroy_task()
+    def done_callback(self, fut_obj: Future) -> None:
+        fut_obj.result()
+        logger.info(f'Attempting to update status to {self._status.value}')
+        self._tm.update_status(self._uid, self._status)
 
 
-# single instance
 tm = TaskManager()
