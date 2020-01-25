@@ -9,11 +9,11 @@ services:
       dockerfile: ./src/Dockerfile
     container_name: flask-app
     env_file:
-      - evars.env
+      - vars.env
     ports:
       - "8080:8080"
     volumes:
-      - .:/code
+      - "./src/:/flask-postgres/src/"
     entrypoint: "dockerize -wait tcp://flask-app-db:5432 -timeout 60s"
     command: ["/bin/bash", "-c", "entrypoint.sh"]
 
@@ -22,7 +22,7 @@ services:
     container_name: flask-app-db
     hostname: flask-app-db
     env_file:
-      - evars.env
+      - vars.env
     ports:
       - "5432:5432"
 #    volumes:
