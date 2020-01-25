@@ -1,28 +1,24 @@
-# src/app/models.py
+# app/models.py
+import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import ARRAY
 from flask_sqlalchemy import SQLAlchemy
-import datetime
+from enum import Enum
 
 
 db = SQLAlchemy()
 
-"""
-Models: the database objects
-"""
+
+class Status(Enum):
+    pending = 'Pending'
+    complete = 'Complete'
+    failed = 'Failed'
 
 
-class Person(db.Model):
-    __tablename__ = 'person'
+class Wiki(db.Model):
+    __tablename__ = 'wiki'
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(64), nullable=False)
-    name = db.Column(db.String(250), nullable=False)
-    birthday = db.Column(
-        db.TIMESTAMP,
-        server_default=db.func.current_timestamp(),
-        nullable=False
-    )
-
-    def __init__(self, uid, name, birthday=None):
-        self.uid = uid
-        self.name = name
-        if isinstance(birthday, datetime.datetime):
-            self.birthday = birthday
+    term = db.Column(db.String(250), unique=True, nullable=False)
+    status = db.Column(sa.Enum(Status), nullable=False, info={'enum_class': Status})
+    messages = db.Column(ARRAY(sa.String(250)))
+    links = db.Column(ARRAY(sa.String(250)))
