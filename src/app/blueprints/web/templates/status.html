@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.5">
-    <title>pogzyb · flask-and-postgres</title>
+    <title>pogzyb · flask-psql-terraform-aws</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.3/examples/sticky-footer/">
 
@@ -47,46 +47,70 @@
     <!-- Begin page content -->
     <main role="main" class="flex-shrink-0">
       <div class="container">
-        <h1 class="mt-5">Status Page</h1>
-        <p class="lead">View the Status of that Long Running Task...(Refresh the page!)</p>
-        <p>Log messages will appear below:</p>
+        <h1 class="mt-5">Status Page for {{ items['wiki'].term }}</h1>
+        <p class="lead">Wikipedia scraping could take a few seconds to complete...</p>
         <hr>
-        {% for msg in items['status'].messages %}
-          <pre><code>{{ msg }}</code></pre>
-        {% endfor %}
-        <hr>
-        {% if items['status'].status.split(' -- ')[-1] == 'I\'m Done!' %}
-        <a class="btn btn-md btn-primary" type="button" href="/">Finished!</a>
-        {% endif %}
+          <div class="status">
+            <div class="alert alert-primary" role="alert">
+              Scraping! — Task "status" messages will appear below ...
+                <span class="spinner-border spinner-border-sm float-right" style="margin-top: 3px;" role="status"></span>
+            </div>
+          </div>
       </div>
     </main>
-
     <footer class="footer mt-auto py-3">
       <div class="container">
         <span class="text-muted">Version 0.1.0 · Release 7/30/2019</span>
+        <span class="text-muted float-right"><a href="/">Home</a></span>
       </div>
     </footer>
   </body>
 
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        (function() {
+          let messages = [];
+          let status = $('.status'),
+            poll = function() {
+              $.ajax({
+                url: '/api/poll/{{ items['wiki'].term }}',
+                dataType: 'json',
+                type: 'get',
+                success: function(data) {
+                    if (data['poll']['status'] === 'Complete') {
+                        clearInterval(pollInterval);
+                        status.empty();
+                        status.append(
+                            "<div class=\"alert alert-success alert-dismissible fade show\" role=\"alert\">\n" +
+                            "<strong>Done!</strong> Here are all links parsed from {{ items['wiki'].term }}'s Wiki...\n" +
+                            "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">\n" +
+                            "<span aria-hidden=\"true\">&times;</span>\n" +
+                            "</button>\n" +
+                            "</div>"
+                        )
+                    } else {
+                        for (let i = 0; i < data['poll']['messages'].length; i++) {
+                            if ( !messages.includes(data['poll']['messages'][i]) ) {
+                                messages.push(data['poll']['messages'][i]);
+                                status.append(
+                                    "<p>" + data['poll']['messages'][i] + "</p>"
+                                );
+                            }
+                        }
+                    }
+                },
+                error: function() { // error logging
+                  console.log('Error!');
+                }
+              });
+            },
+            pollInterval = setInterval(function() { // run function every 2000 ms
+              poll();
+              }, 1000);
+            poll(); // also run function on init
+        })();
+    </script>
 
 </html>
-
-<script>
-    (function poll() {
-        setTimeout(function() {
-            $.ajax({
-                url: "/server/api/function",
-                type: "GET",
-                success: function(data) {
-                    console.log("polling");
-                },
-                dataType: "json",
-                complete: poll,
-                timeout: 2000
-            })
-        }, 5000);
-    })();
-</script>
